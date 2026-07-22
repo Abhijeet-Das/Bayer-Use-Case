@@ -1,0 +1,93 @@
+Dear All,
+
+please finde attached the list of Characteristics and cosmos key figures I would provide for the Zora AI Pilot:
+This is just the cosmos KPIs but characteristics should be mostly the for all provided data:
+
+Key Industry	Characteristic
+Branch Level 2	Characteristic
+Grade Grouping	Characteristic
+Country Group	Characteristic
+Core Business Indicator	Characteristic
+Customer Channel	Characteristic
+Customer Cluster	Characteristic
+Cust.Seg.(Sold_to)	Characteristic
+IBP Demand Priority	Characteristic
+Int. Sales office	Characteristic
+Marketing Level 0	Characteristic
+Marketing Level 1	Characteristic
+Marketing Level 2	Characteristic
+Marketing Level 3	Characteristic
+Marketing Level 4	Characteristic
+CustSeg InScope Flag	Characteristic
+Int. Sales Group	Characteristic
+Ext. Sales Off. Derv	Characteristic
+Extern. Sales Office	Characteristic
+Material	Characteristic
+Material Group	Characteristic
+Material Type	Characteristic
+Business type	Characteristic
+Material Grade	Characteristic
+Inno.Mat.Per.until	Characteristic
+Material packaging	Characteristic
+Prod.Hier.1	Characteristic
+Prod.Hier.2	Characteristic
+Prod.Hier.3	Characteristic
+Prod.Hier.4	Characteristic
+Prod.Hier.5	Characteristic
+Prod.Hier.6	Characteristic
+Produced Material	Characteristic
+Unpacked good	Characteristic
+Ship-to booked	Characteristic
+Country ship-to	Characteristic
+ShTo State/ Province	Characteristic
+Country grp. lev1 SH	Characteristic
+Country grp. lev2 SH	Characteristic
+Cust Hier1	Characteristic
+Cust Hier2	Characteristic
+Cust Hier3	Characteristic
+Glob.Ult.Num.Ship_To	Characteristic
+Marketing Customer ship-to	Characteristic
+Region ship-to	Characteristic
+Subregion ship-to	Characteristic
+Sold-to booked	Characteristic
+Sold-toPartyCountry	Characteristic
+Customer group 2	Characteristic
+DUNS sold-to	Characteristic
+SoTo State/ Province	Characteristic
+country grp. lev1 SO	Characteristic
+Country grp. lev2 SO	Characteristic
+Glob.Ult.Num.Sold_To	Characteristic
+Marketing Customer sold-to	Characteristic
+Seg.Cust.(Sold-To)	Characteristic
+Calendar Day	Characteristic
+Reporting Unit, book	Characteristic
+BG, booked	Characteristic
+Strategic Business Entity	Characteristic
+Company Code	Characteristic
+Country of Company	Characteristic
+Region Company	Characteristic
+Subregion Company	Characteristic
+Calendar month	Characteristic
+Calendar Year/Month	Characteristic
+Cal. Year/Quarter	Characteristic
+Calendar Year	Characteristic
+Sold-to party	Characteristic
+Plant	Characteristic
+Fiscal year / period	Characteristic
+Sales Organization	Characteristic
+Trans. Code, booked	Characteristic
+Gross Sales Qty (in+ex)	KPI
+Gross Sales	KPI
+[+] Sales Deductions	KPI
+Net Sales	KPI
+Price per KG	KPI
+[+] Sales Adjustments	KPI
+Net Proceeds	KPI
+[+] Product Costs, Var.	KPI
+Product Costs, Var /KG	KPI
+[+] Consolidated Marginal Income I	KPI
+[+] Total Manufacturing Costs, Fix	KPI
+Total Manufacturing Costs, Fix /KG	KPI
+[+] Consolidated Marginal Income IIa	KPI
+Exchange rate effect	KPI
+
