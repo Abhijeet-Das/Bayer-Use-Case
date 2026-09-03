@@ -1,0 +1,179 @@
+source
+Act. GI Day
+Actual delivery date
+BG  booked
+BG  booked2
+Calendar Day
+Carrier
+Carrier2
+Company Code
+Company Code2
+Core Business Indicator
+Core Business Indicator2
+Country ship-to
+Country ship-to2
+Country sold-to
+Country sold-to2
+Created on
+Cust Hier1
+Cust Hier12
+Cust Hier2
+Cust Hier22
+Cust Hier3
+Cust Hier32
+Customer Channel
+Customer Channel2
+Customer Cluster
+Customer Cluster2
+Delivery date plann.
+Delivery plant
+Delivery plant2
+Document currency
+Document currency2
+Exchange rate effect
+Extern. Sales Office
+Extern. Sales Office2
+FI-ML0
+FI-ML02
+Fiscal year/period
+Fiscal year/period2
+Int. Sales Group
+Int. Sales Group2
+Int. Sales office
+Int. Sales office2
+Key Industry
+Key Industry2
+Leg transp. Chain
+Leg transp. Chain2
+Loading Country
+Loading Country2
+Loading location
+Loading location2
+Marketing Customer ship-to
+Marketing Customer ship-to2
+Marketing Customer sold-to
+Marketing Customer sold-to2
+Marketing Level 0
+Marketing Level 02
+Marketing Level 1
+Marketing Level 12
+Marketing Level 2
+Marketing Level 22
+Marketing Level 3
+Marketing Level 32
+Marketing Level 4
+Marketing Level 42
+Material
+Material2
+Mode of transport
+Mode of transport2
+Net due date
+PH3 Cluster
+PH3 Cluster2
+Plan. goods is. date
+Plant
+Plant2
+Posting date
+Prod.Hier.1
+Prod.Hier.12
+Prod.Hier.2
+Prod.Hier.22
+Prod.Hier.3
+Prod.Hier.32
+Prod.Hier.4
+Prod.Hier.42
+Prod.Hier.5
+Prod.Hier.52
+Prod.Hier.6
+Prod.Hier.62
+Prod.Hier.622
+Prod.Hier.6222
+Produced Material
+Produced Material2
+Region ship-to
+Region ship-to2
+Region sold-to
+Region sold-to2
+Reporting Unit  book
+Reporting Unit  book2
+Risk Class
+Risk Class2
+Risk category
+Risk category2
+SBE
+SBE2
+Sales Organization
+Sales Organization2
+Ship-to
+Ship-to2
+ShipTo State/ Province
+ShipTo State/ Province2
+Sold-to
+Sold-to2
+SoldTo State/ Province
+SoldTo State/ Province2
+Subregion ship-to
+Subregion ship-to2
+Subregion sold-to
+Subregion sold-to2
+T3 Arr. Date planned
+T3 Arr. date actual
+T3 Loading Loc. ROI
+T3 Loading Loc. ROI2
+T3 SH Shipper
+T3 SH Shipper2
+TM Destin. Location
+TM Destin. Location2
+Unpacked good
+Unpacked good2
+KPI AR-KeyDate: Amount in EUR
+KPI AR-KeyDate: Counter
+KPI AR-KeyDate: Net Value of Billing Item (DC)
+KPI AR-KeyDate: Weighted WoC Target days
+KPI AR-KeyDate: Weighted target days
+KPI AR-PM: Amount EUR
+KPI AR-PM: Counter
+KPI AR-PM: Diff WoC Target
+KPI AR-PM: EDO (Effective Days Outstanding)
+KPI AR-PM: Performance Days
+KPI AR-PM: Posting Days
+KPI AR-PM: Weighted WoC Target days
+KPI AR-PM: Weighted days late
+KPI AR-PM: Weighted performance
+KPI AR-PM: Weighted target days
+KPI COPA: Gross Sales Qty
+KPI COPA: Gross sales
+KPI COPA: Net proceeds
+KPI COPA: Net sales
+KPI COPA: Sales adjustments
+KPI COPA: Sales deductions
+KPI COSMOS: Consolidated Marginal Income 2a
+KPI COSMOS: Consolidated Marginal Income I
+KPI COSMOS: Gross Sales
+KPI COSMOS: Gross Sales Qty (in+ex)
+KPI COSMOS: Net Proceeds
+KPI COSMOS: Net Sales
+KPI COSMOS: Product Costs  Var.
+KPI COSMOS: Sales Adjustments
+KPI COSMOS: Sales Deductions
+KPI COSMOS: Total Manufacturing Costs  Fix
+KPI OTIF: # OT not in full
+KPI OTIF: # OTIF
+KPI OTIF: # late GI
+KPI OTIF: # late IF
+KPI OTIF: # late NIF
+KPI OTIF: # late create
+KPI OTIF: # late transport
+KPI OTIF: # not in full
+KPI OTIF: # on time
+KPI OTIF: # total deliveries
+KPI OTIF: # total late
+KPI OTIF: # total late+OT NIF
+KPI OTIF: 1. Agreed quantity KG
+KPI OTIF: Delivery Quantity KG
+KPI OTIF: Overdelivery KG
+KPI OTIF: Qty deviation KG
+KPI OTIF: Underdelivery KG
+KPI Sales: Delivery Quantity KG
+KPI Sales: Net value deliv. DC
+KPI Sales: Net value delivery EUR
