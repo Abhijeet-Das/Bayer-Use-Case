@@ -1,0 +1,276 @@
+Category 1 — Cross-source
+
+┌──────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  #   │                                                 Question                                                  │
+├──────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ C1.1 │ "Show me our top 8 customers by delivery volume this year, along with their net sales."                   │
+├──────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ C1.2 │ "For our top 8 customers by net proceeds this year, what's their weighted average payment term?"          │
+├──────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ C1.3 │ "Who are our top 8 customers by overdue receivables as of end of June 2026, and what's their OTIF rate    │
+│      │ this year?"                                                                                               │
+├──────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ C1.4 │ "By region, compare net sales, marginal income 1, and OTIF rate for FY2025."                              │
+├──────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ C1.5 │ "Which 8 materials have the lowest margin per kg this year, and how much volume did we sell of each?"     │
+├──────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ C1.6 │ "Which customers are paying furthest above their target payment term this June, and what was their net    │
+│      │ sales that month?"                                                                                        │
+├──────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ C1.7 │ "By company code, compare net sales this year against current open receivables as of end of June 2026."   │
+└──────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+Category 2 — Multiple metrics, same dimension
+
+┌──────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  #   │                                                 Question                                                  │
+├──────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ C2.1 │ "By business entity, show order volume and net delivery value for FY2025."                                │
+├──────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ C2.2 │ "By material, show gross sales quantity, net proceeds, and sales adjustments for FY2025."                 │
+├──────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ C2.3 │ "By plant, show MI1%, MI2a%, and margin per kg for FY2025."                                               │
+├──────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ C2.4 │ "By customer channel, show EDO, performance days, and posting days for FY2025."                           │
+├──────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ C2.5 │ "By region, show OTIF-compliant deliveries, on-time deliveries, not-in-full deliveries, and               │
+│      │ transport-delayed deliveries for FY2025."                                                                 │
+├──────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ C2.6 │ "By company, show weighted target days and weighted WoC target days for FY2025."                          │
+├──────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ C2.7 │ "By risk class, show total receivables amount and line item count for FY2025."                            │
+└──────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+A few phrasing notes worth keeping in mind when you map these back:
+
+- C1.3 and C1.6 deliberately don't say "open item proxy" or "AR-PM absence" — a real user wouldn't know that terminology; they'd just say "overdue" or "paying above target." The resolver has to pick the right underlying logic on its own, which is exactly the ambiguity we want tested.
+- C2.6 is phrased plainly ("weighted target days") even though we flagged this as a trap for raw vs. ratio metrics — a real user asking this wouldn't know they're requesting the pre-multiplied building-block version rather than "WAT Target." Whether the resolver quietly gives them the (fairly useless) raw sum or redirects them to the ratio metric is the actual test.
+- C1.1, C1.2, C1.7 intentionally don't ask the AI to explain the intercompany gap — the question is innocent ("show me X and Y"); whether the response correctly flags missing counterpart data (rather than reporting a fabricated 0%) is what you're testing, not whether it was told to look for that.
+
+
+Category 1 — Cross-source (2+ sources joined on a shared dimension)
+
+C1.1 — Top 8 customers by Order Volume (Sales, FY2025) → their Net Sales (COPA, same period)
+
+Triggers: Sales (delivery_quantity_kg) → COPA (net_sales), joined on Sold-to.
+- Real: top volume is dominated by internal Plant XXXX transfer records (Plant YBPZ: 141.4M kg → €39.7M net sales), with Plant BYDD (59.7M kg) having no COPA rows at all.
+- Synthetic: clean 1:1 mapping, all entries are recognizable customers.
+- Insight: real data's top-volume "customers" are largely intercompany plant-to-plant transfers, not external sales — a resolver naive about this would misreport "our biggest customer" as a warehouse. Synthetic data can't test this since its customer pool has no plant-transfer records.
+
+C1.2 — Top 8 customers by Net proceeds (COPA, FY2025) → their WAT Receivables (AR-PM, same period)
+
+Triggers: COPA (net_proceeds) → AR-PM (weighted_target_days/amount_eur), joined on Sold-to.
+- Real: 6 of the top 8 (all Covestro legal entities: Shanghai, Deutschland, Hong Kong, s.r.l., Polymers China, Netherlands) have no AR-PM rows — intercompany revenue isn't tracked through the same AR clearing process as external customers.
+- Synthetic: all 8 resolve cleanly (WAT 30–90 days).
+- Insight: confirms the same intercompany-gap pattern from C1.1, now on the finance/collections side — real "top customer by revenue" lists need to exclude or flag intercompany entities before a WAT/collections lookup makes sense.
+
+C1.3 — Top 8 customers by Overdue (AR-KeyDate, snapshot 2026-06-30) → their OTIF Rate (OTIF, FY2025)
+
+Triggers: AR-KeyDate (net_due_date < posting_date overdue logic) → OTIF Rate, joined on Sold-to.
+- Real: top overdue customers are mostly Indian manufacturers (VARAHAMURTI FLEXIRUB, Autofit, JUPITER LAMINATORS) — OTIF ranges 70.6–97.6%, no obvious correlation between being overdue and having delivery problems.
+- Synthetic: no customers had overdue > 0 on that single snapshot day (consistent with the earlier finding that this definition returns near-zero results most days).
+- Insight: real data shows overdue and OTIF are largely unrelated signals for these customers — a useful negative finding, since it means the resolver shouldn't assume "bad payer = bad delivery experience" without evidence. Synthetic data's small sample means this specific overdue definition rarely finds anything to report on — worth knowing before building test cases around it.
+
+C1.4 — By region: Net sales (COPA) vs MI1 (COSMOS) vs OTIF Rate (OTIF), FY2025 — 3 sources, 1 dimension
+
+Triggers: COPA + COSMOS + OTIF, joined on Region ship-to.
+
+┌─────────────┬──────────────────┬──────────────┬───────┐
+│   Region    │ Net Sales (COPA) │ MI1 (COSMOS) │ OTIF% │
+├─────────────┼──────────────────┼──────────────┼───────┤
+│ APAC (real) │ €8.58B           │ €1.67B       │ 86.4% │
+├─────────────┼──────────────────┼──────────────┼───────┤
+│ APAC (syn)  │ €54.2M           │ ~€21.6M      │ 82.4% │
+└─────────────┴──────────────────┴──────────────┴───────┘
+
+- Insight: this is the cleanest 3-source join of the batch — all three sources share Region ship-to natively, no proxy needed. Good candidate for a "standard" complex-question template.
+
+C1.5 — Bottom 8 materials by Margin I per kg (COSMOS, FY2025) → their Order Volume (Sales)
+
+Triggers: COSMOS (cmi_1/gross_sales_qty) → Sales (delivery_quantity_kg), joined on Material.
+- Real: bottom materials are all negative margin (-€0.42 to -€4.29/kg) — e.g. "MP COAT AR T33" at -€4.29/kg with 156,182 kg of Sales volume — genuine loss-making products still being shipped at real volume.
+- Synthetic: bottom materials are all still positive (€2.75–2.93/kg) — synthetic KPI generation never produced a loss-making material.
+- Insight: this is a materially important real-data-only finding — negative-margin products actively shipping is exactly the kind of thing a CFO-facing tool should flag, and synthetic data structurally cannot exercise this test case (its cost/revenue randomization never goes negative).
+
+C1.6 — Top customers by WAT overshoot (Actual WAT [AR-PM] − Target [AR-KeyDate], Jun 2026) → Net sales (COPA, same month)
+
+Triggers: AR-PM + AR-KeyDate (computed overshoot) → COPA, joined on Sold-to.
+- Real: extreme outlier — "ELASTOMEROS Y PLASTICOS 2007, S.L." at +752.3 days overshoot, several others at 150–250 days, all with no COPA rows for June 2026 specifically (revenue booked in a different month than the AR activity).
+- Synthetic: much tamer range (-1.9 to +7.0 days), all resolve to real COPA rows.
+- Insight: the 752-day overshoot is almost certainly a genuine data anomaly (extremely old unpaid item) worth a dedicated follow-up question — and it demonstrates why a materiality floor (which this query didn't apply) matters for this kind of ranking; a production version should filter tiny/single-invoice accounts the way we did for DN-04.
+
+C1.7 — By company code: Net sales (COPA, FY2025) vs open-item Receivables proxy (AR-KeyDate, as of 2026-06-30)
+
+Triggers: COPA + AR-KeyDate/AR-PM (open-item proxy), joined on Company Code.
+- Real: Covestro Intern./Sch shows €0 Net Sales but €83.6M open receivables — a company code with real AR exposure but zero revenue booked in COPA this year (likely a financing/holding entity). Covestro S.L./Spanien and Covestro(Shenzhen)/C show negative open receivables (-€403,555 / -€147,552) — credit-heavy positions.
+- Synthetic: all 4 companies show sane, proportionate figures.
+- Insight: real data surfaces genuine outlier company codes (zero-revenue-but-receivables, negative-receivables) that are excellent trap-question material — the resolver needs to handle "explain this anomaly" gracefully rather than just reporting the raw number.
+
+---
+
+Category 2 — Multiple metrics, same dimension, single source
+
+C2.1 — By SBE: Order Volume & Net value of delivery (Sales, FY2025)
+
+Triggers: Sales only (delivery_quantity_kg, net_value_delivery_eur), grouped by SBE.
+- Real: SMDI leads on both volume (2.23B kg) and revenue (€2.64B); note SPCS has high volume (943M kg) but proportionally low revenue (€593M) vs. STDI's smaller volume (855M kg) but higher revenue (€953M) — a value-density difference worth surfacing.
+- Synthetic: only 1 SBE group returned, and it's literally None (blank SBE) — the synthetic generator never populated this field for Sales.
+- Insight: real finding worth fixing before more synthetic testing — SBE isn't populated in the synthetic Sales rows at all, so any question keyed on SBE will only work against real data until that gap is patched.
+
+C2.2 — By material: Gross Sales Qty, Net proceeds, Sales adjustments (COPA, FY2025)
+
+Triggers: COPA only, 3 metrics, grouped by Material.
+- Both datasets return clean, proportionate results (DESMODUR 44 V 20 L variants dominate both).
+- Insight: straightforward, reliable test case — good "easy" example for this category in the final question set.
+
+C2.3 — By plant: MI1%, MI2a%, Margin I per kg (COSMOS, FY2025)
+
+Triggers: COSMOS only, 3 derived ratio metrics, grouped by Plant.
+- Real: a genuine data-quality landmine — SC TPU RTP shows MI1% = 982,978.2% (a near-zero Net Sales denominator blowing up the ratio) and MI1/kg = N/A (zero Gross Sales Qty). Several other plants show 100–200%+ margins, also denominator artifacts.
+- Synthetic: all plants land in a sane 39.2–39.9% band.
+- Insight: this is the single most important finding across both batches for hallucination-prevention purposes — a resolver that doesn't guard against near-zero denominators will confidently report a "982,978% margin" as if it were real. This deserves to be an explicit test case: does the resolver apply a materiality floor, or does it parrot the absurd number?
+
+C2.4 — By customer channel: EDO, Performance Days, Posting Days (AR-PM, FY2025)
+
+Triggers: AR-PM only, 3 metrics, grouped by Customer Channel.
+- Real: only one channel group returned — "Not assigned" — meaning real AR-PM's Customer Channel is essentially unpopulated for FY2025.
+- Synthetic: all 5 channel categories resolve cleanly (35.4–62.1 day EDO range).
+- Insight: mirror image of C2.1 — here it's the real data that has the dimension-population gap, not synthetic. Worth checking whether Customer Channel is populated in AR-PM for other years, or whether this is a structural limitation of that source.
+
+C2.5 — By region: # OTIF, # on time, # not in full, # late transport (OTIF, FY2025)
+
+Triggers: OTIF only, 4 raw counter metrics, grouped by Region ship-to.
+- Both datasets return clean, proportionate breakdowns across all 4 regions (real) / 4 groups (synthetic, incl. "Not assigned").
+- Insight: reliable test case; also a good opportunity to verify the resolver correctly SUM()s these fractional counters rather than averaging or counting rows (a rule we established early in this project).
+
+C2.6 — By company: Weighted target days & Weighted WoC target days (AR-KeyDate raw building blocks, FY2025)
+
+Triggers: AR-KeyDate only, the two raw pre-multiplied metrics (not their ratio forms), grouped by Company Code.
+- Both datasets return large raw sums (hundreds of billions/millions) — correctly not interpretable as day-figures on their own.
+- Insight: deliberately included this one as a trap for the resolver's understanding of building-block vs. ratio metrics — if asked for these by name, does it correctly present them as intermediate/raw sums (or better, decline and suggest WAT Target/WOC Target instead), or does it mistakenly report "644 billion days" as if it were a real duration? Good test of whether calculation_logic/critical_notes guidance actually gets respected.
+
+C2.7 — By risk class: Amount in EUR & Counter (AR-KeyDate, FY2025)
+
+Triggers: AR-KeyDate only, 2 metrics, grouped by Risk Class.
+- Real: 7 risk categories, "Not assigned" leads (€14.6B), "Intercompany" is a distinct tiny category (€275K) — confirms risk classification exists as a real, granular dimension.
+- Synthetic: only 4 categories present (smaller pool), no "Intercompany" or "Low default risk"/"New customer" categories at all.
+- Insight: synthetic data's risk-class pool is narrower than real data's — fine for basic testing, but any question specifically about intercompany risk exposure needs real data.
+
+---
+
+Summary so far (14 of ~28 questions)
+
+The two most consequential findings for your stated goal (avoiding hallucination):
+1. C2.3's near-zero-denominator blowup (982,978% margin) — a concrete, reproducible test of whether the resolver guards against degenerate ratios.
+2. C1.1/C1.2/C1.7's intercompany-entity gaps — real customers/companies that exist in one source but not another; tests whether the resolver says "no data" or fabricates a number.
+
+Also worth flagging: synthetic data has real dimension-population gaps of its own (SBE missing in Sales, narrower Risk Class pool, no LATAM customers) — these aren't bugs exactly, but they mean some of the more interesting real-data test cases (C2.1, C2.7, and earlier C1.1/C1.2) simply can't be reproduced against synthetic data and should be flagged as "real-data-only" in the final question set.
+
+
+Category 3 — Same metric, multiple dimensions (cross-tab)
+
+C3.1 — "By region and customer channel, what was our net sales for FY2025?"
+
+Triggers: COPA (net_sales), 2D grouped by Region ship-to × Customer Channel.
+- Real: APAC/DIR-Direct dominates (€5.35B). Synthetic: same shape, APAC/DIR-Direct also leads (€47.8M).
+- Insight: cross-tab structure holds identically across both datasets — good, low-risk template for validating the resolver's 2D grouping.
+
+C3.2 — "What's our OTIF rate by region and carrier this year?"
+
+Triggers: OTIF (n_otif/n_total_deliveries), 2D grouped by Region ship-to × Carrier.
+- Real: wide OTIF range across carrier/region pairs (60.9% DHL/APAC to 92.2% Shanghai Xiaorong/APAC) — a genuine carrier-performance spread.
+- Synthetic: similar range (55.6–85.7%) but tiny sample sizes (n=25–28) — needed a much lower materiality floor (>5 vs. >100) to return anything.
+- Insight: this question type works on both, but confidence should scale with n — worth testing whether the resolver's narrative caveats sample size (real n≈12K–82K vs. synthetic n≈25–28) rather than presenting both with equal confidence.
+
+C3.3 — "Show me order volume by plant and marketing segment for FY2025."
+
+Triggers: Sales (delivery_quantity_kg), 2D grouped by Plant × Marketing Level 0.
+- Both datasets return clean, well-populated cross-tabs (PM segment dominates in both).
+
+C3.4 — "What's our weighted average target payment term by region and risk class this year?"
+
+Triggers: AR-KeyDate (weighted_target_days/amount_in_eur), 2D grouped by Region sold-to × Risk Class.
+- Real: a striking outlier — EMEA/Medium default risk = 156.5 days, roughly 2–3x every other region/risk combo (43–90 days elsewhere).
+- Synthetic: much flatter range (30–90 days), no comparable outlier.
+- Insight: real-data-only anomaly worth a dedicated follow-up question — that 156.5-day figure for a "Medium" (not even "Very high") risk segment in EMEA deserves investigation; a well-built resolver response should flag it as unusual rather than reporting it flatly.
+
+C3.5 — "What's our selling price by region and marketing segment this year?"
+
+Triggers: COPA (net_sales/gross_sales_qty), 2D grouped by Region ship-to × Marketing Level 0.
+- Real: €1.51–3.81/kg range. Synthetic: €7.44–8.48/kg — 2–5x higher across the board.
+- Insight: confirms something worth flagging structurally — synthetic data's price/cost generation isn't calibrated to real magnitude. Fine for logic-testing (does the resolver compute the ratio correctly), but synthetic absolute values shouldn't be used to sanity-check whether a number "looks right" — only real data should be used for that kind of plausibility check.
+
+C3.6 — "Show margin per kg by plant and marketing segment for FY2025."
+
+Triggers: COSMOS (cmi_1/gross_sales_qty), 2D grouped by Plant × Marketing Level 0.
+- Same pattern as C3.5: real €0.22–0.95/kg vs. synthetic €2.91–3.31/kg — same calibration gap, consistent finding.
+
+C3.7 — "What's our EDO by region and company this year?"
+
+Triggers: AR-PM (edo/amount_eur), 2D grouped by Region sold-to × Company Code.
+- Both datasets return clean, proportionate results (42–68 days real, 34–61 days synthetic) — reliable test case, no anomalies.
+
+---
+
+Category 4 — Multiple metrics + multiple dimensions
+
+C4.1 — "Show net sales and gross sales by region and customer channel for FY2025."
+
+Triggers: COPA (2 metrics), 2D by Region ship-to × Customer Channel. Clean on both.
+
+C4.2 — "What's our MI1% and MI2a% by region and company this year?"
+
+Triggers: COSMOS (2 metrics), 2D by Region ship-to × Company Code.
+- Real: MI1%≈MI2a% almost identically per row (e.g., 36.5% vs 36.6%) — the same unexplained CMI-2a-tracks-CMI-I behavior flagged repeatedly this project.
+- Synthetic: a consistent ~2pp gap between MI1% and MI2a% (e.g., 39.1% vs. 40.8%) — the synthetic generator's CMI 2a formula behaves differently from real COSMOS's.
+- Insight: good divergence to know about — if a test question expects "MI1% ≈ MI2a%" as a sanity check, that only holds on real data.
+
+C4.3 — "Show order volume and net delivery value by region and marketing segment for FY2025."
+
+Triggers: Sales (2 metrics), 2D by Region sold-to × Marketing Level 0. Clean on both.
+
+C4.4 — "What's our WAT and WOC target by region and company this year?"
+
+Triggers: AR-KeyDate (2 metrics), 2D by Region sold-to × Company Code.
+- Real: another striking outlier — EMEA/Covestro S.r.l. WAT = 449.4 days vs. 48–70 days for every other region/company pair.
+- Synthetic: no equivalent outlier (37.5–64.4 day range).
+- Insight: second real-data-only anomaly this batch — worth a dedicated drill-down question later ("why does Covestro S.r.l. in EMEA have a 449-day target?").
+
+C4.5 — "Show EDO and weighted days late by region and company for FY2025."
+
+Triggers: AR-PM (2 metrics), 2D by Region sold-to × Company Code. Clean on both — real WDD ranges -6.5 to +2.8 days, synthetic -1.5 to -4.0 days (both plausible, synthetic slightly more uniformly "early").
+
+C4.6 — "Show variable product cost per kg and margin per kg by plant and marketing segment for FY2025."
+
+Triggers: COSMOS (2 metrics), 2D by Plant × Marketing Level 0.
+- Same real-vs-synthetic magnitude gap as C3.5/C3.6 (real €0.84–1.39/kg cost vs. synthetic €4.26–5.02/kg) — consistent, expected finding.
+
+C4.7 — "Show gross sales and sales deductions by region and marketing segment for FY2025."
+
+Triggers: COPA (2 metrics), 2D by Region ship-to × Marketing Level 0. Clean on both; real shows APAC/EP has almost no deductions (€2.8M on €2.8B gross, ~0.1%) vs. APAC/PM (~1%) — a real, minor pattern worth noting but not alarming.
+
+---
+
+Replacement questions (for C1.1, C1.2, C2.1, C2.7)
+
+C1.1 replacement — "By plant, compare order volume and net sales for FY2025."
+
+Triggers: Sales + COPA, joined on Plant (not customer). Real: all 8 top plants resolve on both sides cleanly — no intercompany-style gaps at the plant level. Synthetic: also clean.
+Insight: switching the join key from customer to plant eliminates the intercompany-gap problem from the original C1.1 — confirms that gap was specifically about customer identity (holding entities), not a general cross-source join weakness. Good "both-datasets-safe" replacement.
+
+C1.2 replacement — "By region, compare net proceeds and WAT receivables for FY2025."
+
+Triggers: COPA + AR-PM, joined on Region. Real: 4 real regions resolve cleanly; "Not assigned" region has COPA data but no AR-PM match (WAT=None) — a smaller, region-level echo of the original gap, but far less disruptive than the customer-level version. Synthetic: all 4 groups resolve.
+Insight: aggregating to region instead of customer mostly — but not entirely — avoids the gap; still useful as a milder version of the same test.
+
+C2.1 replacement — "By region, show order volume and net delivery value for FY2025."
+
+Triggers: Sales only (2 metrics), grouped by Region sold-to. Clean on both — real APAC leads (2.93B kg / €4.32B), synthetic APAC leads too (3.92M kg / €32.8M), same ordering.
+Insight: reliable substitute for the SBE version — SBE isn't populated in synthetic Sales at all, but Region is populated everywhere, so this fully achieves the "multi-metric, same dimension, single source" test intent without the coverage gap.
+
+C2.7 replacement — "By region, show total receivables amount and line item count for FY2025."
+
+Triggers: AR-KeyDate only (2 metrics), grouped by Region sold-to. Clean on both — real EMEA leads (€14.7B / 437,827 items), synthetic APAC leads (€47.6M / 1,351 items).
+Insight: fully portable across both datasets, unlike the original Risk Class version (which had a narrower category set in synthetic) — a safer default if the goal is question reliability across both data sources.
+
+---
