@@ -1,0 +1,24 @@
+Applicant's photo must be in jpeg or jpg format, with max size 500kb and minimum dimensions are 200 pixels (width) x 200 pixels (height) and maximum dimensions are 3500 pixels (width) x 3500 pixels (height).
+Applicant's signature must be in jpeg or jpg format, with max size 500kb and minimum dimensions are 200 pixels (width) x 67 pixels (height). maximum dimensions are 3500 pixels (width) x 2500 pixels (height).
+File name should contain alphanumeric characters only.
+If thumb impression is not possible, please upload a blank page in signature.
+
+
+Key Points For Upload
+1. Max Size allowed for a document-file is 1000KB.
+
+2. Document-file should be in PDF format.
+
+3. No attachments of required documents or wrong/blank attachments would make the application invalid.
+
+4. Please ensure that the file is not password protected.
+
+5. File name should contain alphanumeric characters only.
+
+
+Registration Form (Page-I)
+Applicant's Passport Details - Previous Passport Number
+
+Employment letter or work contract letter. 
+Marriage certificate should be self-attested from my and my spouse `?
+All details to be populated in the fields document provided in any field like spouse information.
